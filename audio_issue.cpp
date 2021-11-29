@@ -87,8 +87,8 @@ int main(int argc, char **argv){
     deckLink->QueryInterface(IID_IDeckLinkOutput, (void **) &deckLinkOutput);
     deckLinkOutput->GetDisplayModeIterator(&displayModeIterator);
     while (displayModeIterator->Next(&displayMode) == S_OK) {
-            std::cout <<timeValue<<" == "<<timeScale<<std::endl;
             displayMode->GetFrameRate(&timeValue, &timeScale);
+            std::cout <<timeValue<<" == "<<timeScale<<std::endl;
             if (displayMode->GetFieldDominance() == bmdProgressiveFrame && timeValue == 1000) {
                 if ( timeScale == fps)
                 {
@@ -118,38 +118,38 @@ int main(int argc, char **argv){
     long underflow_count = 0;
     long overflow_count = 0;
     while (1) {
-            high_resolution_clock::time_point now;
-            do {
-                    now = high_resolution_clock::now();
-            } while (duration_cast<std::chrono::duration<double> >(now - t0).count() < (double) timeValue / timeScale);
-            
-            t0 = now;
+        high_resolution_clock::time_point now;
+        do {
+                now = high_resolution_clock::now();
+        } while (duration_cast<std::chrono::duration<double> >(now - t0).count() < (double) timeValue / timeScale);
+        
+        t0 = now;
 
-            deckLinkOutput->DisplayVideoFrameSync(f);
+        deckLinkOutput->DisplayVideoFrameSync(f);
 
-            uint32_t sampleFramesWritten = 0;
-            uint32_t buffered = 0;
-            deckLinkOutput->GetBufferedAudioSampleFrameCount(&buffered);
-            if (buffered == 0) {
-                    underflow_count = underflow_count + 1;
-                    // Skip first one as will always be empty
-                    if (frame_count !=0 ){
-                        clog << "audio buffer underflow!\n";
-                        clog << "at frame " << frame_count << " overflows "<< overflow_count<<" "<<" underflows "<<underflow_count<<std::endl;
-                    }
+        uint32_t sampleFramesWritten = 0;
+        uint32_t buffered = 0;
+        deckLinkOutput->GetBufferedAudioSampleFrameCount(&buffered);
+        if (buffered == 0) {
+            underflow_count = underflow_count + 1;
+            // Skip first one as will always be empty
+            if (frame_count !=0 ){
+                clog << "audio buffer underflow!\n";
+                clog << "at frame " << frame_count << " overflows "<< overflow_count<<" "<<" underflows "<<underflow_count<<std::endl;
             }
-            deckLinkOutput->WriteAudioSamplesSync(audio, sampleFrameCount,
-                            &sampleFramesWritten);
-            if (sampleFramesWritten < sampleFrameCount) {
-                    overflow_count = overflow_count + 1;
-
-                    clog << "audio buffer overflow!\n";
-                    clog << "at frame " << frame_count << " overflows "<< overflow_count<<" "<<" underflows "<<underflow_count<<std::endl;
-             }
-            audio += sampleFrameCount * bps * ch_count;
-            if (audio == audio_end) {
-                    audio = audio_start;
-            }
-            frame_count = frame_count + 1;
         }
+        deckLinkOutput->WriteAudioSamplesSync(audio, sampleFrameCount,
+                        &sampleFramesWritten);
+        if (sampleFramesWritten < sampleFrameCount) {
+            overflow_count = overflow_count + 1;
+
+            clog << "audio buffer overflow!\n";
+            clog << "at frame " << frame_count << " overflows "<< overflow_count<<" "<<" underflows "<<underflow_count<<std::endl;
+         }
+        audio += sampleFrameCount * bps * ch_count;
+        if (audio == audio_end) {
+                audio = audio_start;
+        }
+        frame_count = frame_count + 1;
+    }
 }
