@@ -117,6 +117,7 @@ int main(int argc, char **argv){
     long  frame_count = 0;
     long underflow_count = 0;
     long overflow_count = 0;
+    long last_error_count =0;
     while (1) {
         high_resolution_clock::time_point now;
         do {
@@ -134,8 +135,10 @@ int main(int argc, char **argv){
             underflow_count = underflow_count + 1;
             // Skip first one as will always be empty
             if (frame_count !=0 ){
+                clog << "Diff "<< frame_count - last_error_count << std::endl;
                 clog << "audio buffer underflow!\n";
                 clog << "at frame " << frame_count << " overflows "<< overflow_count<<" "<<" underflows "<<underflow_count<<std::endl;
+                last_error_count = frame_count;
             }
         }
         deckLinkOutput->WriteAudioSamplesSync(audio, sampleFrameCount,
@@ -149,6 +152,9 @@ int main(int argc, char **argv){
         audio += sampleFrameCount * bps * ch_count;
         if (audio == audio_end) {
                 audio = audio_start;
+        }
+        if (frame_count % 1000  == 0){
+            clog<<"FC "<< frame_count<<std::endl;
         }
         frame_count = frame_count + 1;
     }
