@@ -153,8 +153,8 @@ int main(int argc, char **argv){
         else if(result == E_INVALIDARG){
             clog << frame_count << "DisplayVideoFrameSync Invalid arg" <<std::endl;
         }
-        deckLinkOutput->GetHardwareReferenceClock(timeScale, &hardware_time, &timeInFrame, &ticksPerFrame);
         if (verbose){
+            deckLinkOutput->GetHardwareReferenceClock(timeScale, &hardware_time, &timeInFrame, &ticksPerFrame);
             clog << "frame= " << frame_count <<" hardware_time= "<<hardware_time<<" timeInFrame= " <<timeInFrame<<" ticksPerFrame= "<<ticksPerFrame<<std::endl;
             clog << "frame= " << frame_count <<" diffhardware_time= "<<hardware_time-last_hardware_time<<" difftimeInFrame= " <<timeInFrame-last_timeInFrame<<" diffticksPerFrame= "<<ticksPerFrame-last_ticksPerFrame<<std::endl;
             last_timeInFrame = timeInFrame;
@@ -189,5 +189,8 @@ int main(int argc, char **argv){
                 audio = audio_start;
         }
         frame_count = frame_count + 1;
+        if (frame_count % (fps /1000) == 0){
+            clog << frame_count <<std::endl;
+        }
     }
 }
