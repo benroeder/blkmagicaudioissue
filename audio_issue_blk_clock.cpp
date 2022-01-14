@@ -134,6 +134,8 @@ int main(int argc, char **argv){
     BMDTimeValue blk_hardware_time;
     BMDTimeValue blk_timeInFrame;
     BMDTimeValue blk_ticksPerFrame;
+    BMDTimeValue last_blk_ticksPerFrame =0;
+
     
     deckLinkOutput->GetHardwareReferenceClock(timeScale, &t0, &blk_timeInFrame, &blk_ticksPerFrame);
 
@@ -151,9 +153,12 @@ int main(int argc, char **argv){
     
     while (1) {
         BMDTimeValue now=0;
-        
+        BMDTimeValue last_blk_ticksPerFrame = blk_ticksPerFrame;
         do {
                 deckLinkOutput->GetHardwareReferenceClock(timeScale, &now, &blk_timeInFrame, &blk_ticksPerFrame);
+            if (last_blk_ticksPerFrame != blk_ticksPerFrame){
+                clog << "TICKS CHANGED blk_ticksPerFrame " << blk_ticksPerFrame << " last_blk_ticksPerFrame " << last_blk_ticksPerFrame << " diff " <<last_blk_ticksPerFrame - blk_ticksPerFrame <<std::endl;
+            }
         } while (now - t0 < blk_ticksPerFrame);
         if(now -t0 != 1000) {
             clog << "blk_ticksPerFrame " << blk_ticksPerFrame  << " blk_timeInFrame "<< blk_timeInFrame << " now " <<now<<" t0 "<<t0<<" diff "<<now -t0<<std::endl;
